@@ -29,9 +29,17 @@ The code in this repository has binary dependencies that live in the ForgeRock m
 
 **SPECIFIC BUILD INSTRUCTIONS HERE**
 
-**SCREENSHOTS ARE GOOD LIKE BELOW**
+**Impersonation Tree**
 
-![ScreenShot](./example.png)
+![ScreenShot](./ImpersonateTree.png)
+
+**Login Screen**
+
+![ScreenShot](./LoginScreen.png)
+
+**User Profile page for impersonated user **
+
+![ScreenShot](./UserProfile.png)
 
         
 The sample code described herein is provided on an "as is" basis, without warranty of any kind, to the fullest extent permitted by law. ForgeRock does not warrant or guarantee the individual success developers may have in implementing the sample code on their development platforms or in production configurations.
