@@ -35,9 +35,8 @@ import static org.forgerock.openam.auth.node.api.SharedStateConstants.USERNAME;
 public class ImpersonateNode extends AbstractDecisionNode {
 
     private final static String DEBUG_FILE = "ImpersonateNode";
-    private static final String DEFAULT_IMP_USER_SHARED_STATE = "Impersonator";
     private final Config config;
-    protected Debug debug = Debug.getInstance(DEBUG_FILE);
+    private Debug debug = Debug.getInstance(DEBUG_FILE);
 
     /**
      * Create the node.
@@ -53,20 +52,20 @@ public class ImpersonateNode extends AbstractDecisionNode {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
 
-        String impersonateUsername;
+        debug.message("[ImpersonateNode]: Using Impersonator: " + context.sharedState.get(USERNAME).asString());
 
-        // Get impersonator from shared state
-        if (context.sharedState.isDefined(DEFAULT_IMP_USER_SHARED_STATE)) {
-            impersonateUsername = context.sharedState.get(DEFAULT_IMP_USER_SHARED_STATE).asString();
-        } else {
-            // Get impersonator from node config
-            impersonateUsername = config.impersonator();
+        String impersonatedUserID = config.impersonatedUserID();
+
+        // Get impersonatedUserID from shared state
+        if ((impersonatedUserID.indexOf("{{") == 0) && (impersonatedUserID.indexOf("}}") == (impersonatedUserID.length() - 2))) {
+            impersonatedUserID = context.sharedState.get(impersonatedUserID.substring(2, impersonatedUserID.length() - 2)).asString();
+            debug.message("[ImpersonateNode]:  Found existing shared state attribute {{impersonated}}: " + impersonatedUserID);
         }
 
-        debug.message("Impersonate node using impersonator:" + impersonateUsername);
+        debug.message("[ImpersonateNode]: Using Impersonated UserID:" + impersonatedUserID);
 
-        // Changing the shared state "username" to impersonator
-        return goTo(true).replaceSharedState(context.sharedState.copy().put(USERNAME, impersonateUsername)).build();
+        // Changing the shared state "username" to impersonatedUserID
+        return goTo(true).replaceSharedState(context.sharedState.copy().put(USERNAME, impersonatedUserID)).build();
     }
 
     /**
@@ -74,8 +73,8 @@ public class ImpersonateNode extends AbstractDecisionNode {
      */
     public interface Config {
         @Attribute(order = 100)
-        default String impersonator() {
-            return "Impersonator UserID";
+        default String impersonatedUserID() {
+            return "{{impersonated}}";
         }
     }
 }
