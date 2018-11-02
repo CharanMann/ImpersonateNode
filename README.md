@@ -16,7 +16,8 @@
 # ImpersonateNode
 
 An impersonator node for ForgeRock's [Identity Platform][forgerock_platform] 5.5 and above. This node just replaces the shared state "username" with userID that impersonator needs to impersonate.
-In sample tree, we have added checks such as impersonator should have a specific role, perform MFA before impersonating. 
+Impersonation is a great power and "With Great Power Comes Great Responsibility". This means we need to make sure that only certain users can perform impersonation. 
+In sample tree, we have added checks such as impersonator should have a specific role, perform MFA before impersonating. Also, auditing these events is highly encouraged.   
 
 
 Copy the .jar file from the ../target directory into the ../web-container/webapps/openam/WEB-INF/lib directory where AM is deployed.  Restart the web container to pick up the new node.  The node will then appear in the authentication trees components palette.
