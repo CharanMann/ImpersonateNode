@@ -34,15 +34,15 @@ The code in this repository has binary dependencies that live in the ForgeRock m
 
 ![ScreenShot](./ImpersonateTree.png)
 
-**Login Screen 1**
+**Login Screen: Refer field comments**
 
 ![ScreenShot](./LoginScreen1.png)
 
-**Login Screen 2**
+**Login Screen: User enters specific values**
 
 ![ScreenShot](./LoginScreen2.png)
 
-**User Profile page for impersonated user **
+**User Profile page for impersonated user**
 
 ![ScreenShot](./UserProfile.png)
 
