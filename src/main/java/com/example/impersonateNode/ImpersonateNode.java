@@ -19,11 +19,13 @@ package com.example.impersonateNode;
 
 import com.google.inject.assistedinject.Assisted;
 import com.sun.identity.shared.debug.Debug;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openam.annotations.sm.Attribute;
 import org.forgerock.openam.auth.node.api.*;
 
 import javax.inject.Inject;
 
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.openam.auth.node.api.SharedStateConstants.USERNAME;
 
 /**
@@ -37,6 +39,8 @@ public class ImpersonateNode extends AbstractDecisionNode {
     private final static String DEBUG_FILE = "ImpersonateNode";
     private final Config config;
     private Debug debug = Debug.getInstance(DEBUG_FILE);
+    private String impersonatedUserID;
+    private String impersonatorUserID;
 
     /**
      * Create the node.
@@ -49,12 +53,13 @@ public class ImpersonateNode extends AbstractDecisionNode {
         this.config = config;
     }
 
+
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
 
         debug.message("[ImpersonateNode]: Using Impersonator: " + context.sharedState.get(USERNAME).asString());
-
-        String impersonatedUserID = config.impersonatedUserID();
+        impersonatorUserID = context.sharedState.get(USERNAME).asString();
+        impersonatedUserID = config.impersonatedUserID();
 
         // Get impersonatedUserID from shared state
         if ((impersonatedUserID.indexOf("{{") == 0) && (impersonatedUserID.indexOf("}}") == (impersonatedUserID.length() - 2))) {
@@ -68,6 +73,10 @@ public class ImpersonateNode extends AbstractDecisionNode {
         return goTo(true).replaceSharedState(context.sharedState.copy().put(USERNAME, impersonatedUserID)).build();
     }
 
+    @Override
+    public JsonValue getAuditEntryDetail() {
+        return json(object(field("impersonatorUserID", impersonatorUserID),field("impersonatedUserId", impersonatedUserID)));
+    }
     /**
      * Configuration for the node.
      */
