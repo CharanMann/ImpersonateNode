@@ -46,8 +46,10 @@ The code in this repository has binary dependencies that live in the ForgeRock m
 
 ![ScreenShot](./UserProfile.png)
 
-**Auditing**
-1. During authentication, audit events are logged specifying impersonatorUserID and impersonatedUserID in authentication.audit.json:  
+
+
+**AUDITING**
+1. During authentication, audit events are logged specifying **impersonatorUserID** and **impersonatedUserID** in authentication.audit.json:  
 ```
 {"realm":"/employees","transactionId":"166630bb-8e1c-447b-acea-3a976a67a9eb","component":"Authentication","eventName":"AM-NODE-LOGIN-COMPLETED","entries":[{"info":{"nodeOutcome":"true","treeName":"ImpersonateTree","displayName":"ImpersonateNode","nodeType":"ImpersonateNode","nodeId":"6578195d-b913-4133-a29b-62edb753f8e5","authLevel":"0","nodeExtraLogging":{"impersonatorUserID":"user.666","impersonatedUserID":"user.90"}}}],"principal":["user.90"],"timestamp":"2019-04-18T16:36:12.761Z","trackingIds":["992714be-133e-4b88-a155-50236b90eaa4-17549"],"_id":"992714be-133e-4b88-a155-50236b90eaa4-17723"}
 ```
@@ -124,16 +126,15 @@ The code in this repository has binary dependencies that live in the ForgeRock m
       'http://am6002.example.com:8282/am/json/sessions?tokenId=xIq5m2parhVVFoCDXPjJXhlls8U.%2AAAJTSQACMDEAAlNLABx2dUtSZ1RURDhNWWlZOFBPTGpuckJaQUpJOWc9AAR0eXBlAANDVFMAAlMxAAA.%2A&_action=validate' \
       -H 'Accept-API-Version: resource=1.1' \
       -H 'Content-Type: application/json' \
-      -H 'Postman-Token: 00bc236d-8868-4b55-8a87-494aa12e34d7' \
-      -H 'X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb' \
-      -H 'cache-control: no-cache'
+      -H 'X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb'
     ```
     results in below entry in access.audit.json
     ```
     {"realm":"/","transactionId":"992714be-133e-4b88-a155-50236b90eaa4-18063","userId":"id=user.90,ou=user,o=employees,ou=services,dc=openam,dc=forgerock,dc=org","client":{"ip":"192.168.56.1","port":60705},"server":{"ip":"192.168.56.132","port":8282},"http":{"request":{"secure":false,"method":"POST","queryParameters":{"_action":["validate"]},"headers":{"accept":["*/*"],"accept-api-version":["resource=1.1"],"host":["am6002.example.com:8282"],"postman-token":["66206b06-6a30-406d-b125-98a903946566"],"user-agent":["PostmanRuntime/7.6.1"],"x-forgerock-transactionid":["166630bb-8e1c-447b-acea-3a976a67a9eb"]},"cookies":{"amlbcookie":"01"},"path":"http://am6002.example.com:8282/am/json/sessions"}},"request":{"protocol":"CREST","operation":"ACTION","detail":{"action":"validate"}},"timestamp":"2019-04-18T16:37:22.887Z","eventName":"AM-ACCESS-OUTCOME","component":"Session","response":{"status":"SUCCESSFUL","statusCode":"","elapsedTime":101,"elapsedTimeUnits":"MILLISECONDS"},"trackingIds":["992714be-133e-4b88-a155-50236b90eaa4-17549"],"_id":"992714be-133e-4b88-a155-50236b90eaa4-18080"}
     ```
     
-    * Common transactionId: 166630bb-8e1c-447b-acea-3a976a67a9eb can be used to filter audit logs for impersonated events.   
+    * Common transactionId: *166630bb-8e1c-447b-acea-3a976a67a9eb* can be used to filter audit logs for impersonated events.   
+
 
 
 
