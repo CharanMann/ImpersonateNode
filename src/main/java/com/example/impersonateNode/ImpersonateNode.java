@@ -75,8 +75,9 @@ public class ImpersonateNode extends AbstractDecisionNode {
 
     @Override
     public JsonValue getAuditEntryDetail() {
-        return json(object(field("impersonatorUserID", impersonatorUserID),field("impersonatedUserId", impersonatedUserID)));
+        return json(object(field("impersonatorUserID", impersonatorUserID), field("impersonatedUserID", impersonatedUserID)));
     }
+
     /**
      * Configuration for the node.
      */
