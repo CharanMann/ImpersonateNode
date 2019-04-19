@@ -54,7 +54,7 @@ The code in this repository has binary dependencies that live in the ForgeRock m
 {"realm":"/employees","transactionId":"166630bb-8e1c-447b-acea-3a976a67a9eb","component":"Authentication","eventName":"AM-NODE-LOGIN-COMPLETED","entries":[{"info":{"nodeOutcome":"true","treeName":"ImpersonateTree","displayName":"ImpersonateNode","nodeType":"ImpersonateNode","nodeId":"6578195d-b913-4133-a29b-62edb753f8e5","authLevel":"0","nodeExtraLogging":{"impersonatorUserID":"user.666","impersonatedUserID":"user.90"}}}],"principal":["user.90"],"timestamp":"2019-04-18T16:36:12.761Z","trackingIds":["992714be-133e-4b88-a155-50236b90eaa4-17549"],"_id":"992714be-133e-4b88-a155-50236b90eaa4-17723"}
 ```
 2. AM can be configured for [trusting common transaction Id](https://backstage.forgerock.com/docs/am/6.5/maintenance-guide/#configuring-trusttransactionheader-system-property). This means client application can leverage the same transaction Id header(X-ForgeRock-Transactionid) for performing all impersonated operations and AM shall log audit events with the same transaction id, such as:
-    * Authenticate with X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb
+    * Authenticate: Include random X-ForgeRock-Transactionid such as: 166630bb-8e1c-447b-acea-3a976a67a9eb
     ```
     curl -X POST \
       'http://am6002.example.com:8282/am/json/realms/root/realms/employees/authenticate?authIndexType=service&authIndexValue=ImpersonateTree' \
@@ -115,12 +115,12 @@ The code in this repository has binary dependencies that live in the ForgeRock m
         ]
     }'
     ```
-    results in below audit entry in authentication.audit.json  
+    Corresponding audit entry in authentication.audit.json  
     ```
     {"realm":"/employees","transactionId":"166630bb-8e1c-447b-acea-3a976a67a9eb","component":"Authentication","eventName":"AM-NODE-LOGIN-COMPLETED","entries":[{"info":{"nodeOutcome":"true","treeName":"ImpersonateTree","displayName":"ImpersonateNode","nodeType":"ImpersonateNode","nodeId":"6578195d-b913-4133-a29b-62edb753f8e5","authLevel":"0","nodeExtraLogging":{"impersonatorUserID":"user.666","impersonatedUserID":"user.90"}}}],"principal":["user.90"],"timestamp":"2019-04-18T16:36:12.761Z","trackingIds":["992714be-133e-4b88-a155-50236b90eaa4-17549"],"_id":"992714be-133e-4b88-a155-50236b90eaa4-17723"}
     ```
 
-    * Validate with X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb
+    * Validate: Include same X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb
     ```
     curl -X POST \
       'http://am6002.example.com:8282/am/json/sessions?tokenId=xIq5m2parhVVFoCDXPjJXhlls8U.%2AAAJTSQACMDEAAlNLABx2dUtSZ1RURDhNWWlZOFBPTGpuckJaQUpJOWc9AAR0eXBlAANDVFMAAlMxAAA.%2A&_action=validate' \
@@ -128,7 +128,7 @@ The code in this repository has binary dependencies that live in the ForgeRock m
       -H 'Content-Type: application/json' \
       -H 'X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb'
     ```
-    results in below entry in access.audit.json
+    Corresponding audit entry in access.audit.json
     ```
     {"realm":"/","transactionId":"992714be-133e-4b88-a155-50236b90eaa4-18063","userId":"id=user.90,ou=user,o=employees,ou=services,dc=openam,dc=forgerock,dc=org","client":{"ip":"192.168.56.1","port":60705},"server":{"ip":"192.168.56.132","port":8282},"http":{"request":{"secure":false,"method":"POST","queryParameters":{"_action":["validate"]},"headers":{"accept":["*/*"],"accept-api-version":["resource=1.1"],"host":["am6002.example.com:8282"],"postman-token":["66206b06-6a30-406d-b125-98a903946566"],"user-agent":["PostmanRuntime/7.6.1"],"x-forgerock-transactionid":["166630bb-8e1c-447b-acea-3a976a67a9eb"]},"cookies":{"amlbcookie":"01"},"path":"http://am6002.example.com:8282/am/json/sessions"}},"request":{"protocol":"CREST","operation":"ACTION","detail":{"action":"validate"}},"timestamp":"2019-04-18T16:37:22.887Z","eventName":"AM-ACCESS-OUTCOME","component":"Session","response":{"status":"SUCCESSFUL","statusCode":"","elapsedTime":101,"elapsedTimeUnits":"MILLISECONDS"},"trackingIds":["992714be-133e-4b88-a155-50236b90eaa4-17549"],"_id":"992714be-133e-4b88-a155-50236b90eaa4-18080"}
     ```
