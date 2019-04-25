@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright ${data.get('yyyy')} ForgeRock AS.
+ * Copyright 2019 ForgeRock AS.
 -->
 # ImpersonateNode
 
@@ -49,20 +49,20 @@ The code in this repository has binary dependencies that live in the ForgeRock m
 
 
 **AUDITING**
-1. During authentication, audit events are logged specifying **impersonatorUserID** and **impersonatedUserID** in authentication.audit.json:  
+1. During authentication, when this node completes, a `AM-NODE-LOGIN-COMPLETED` audit event is logged to authentication.audit.json.  The audit event records the **impersonatorUserID** and **impersonatedUserID**:
 ```
-{"realm":"/employees","transactionId":"166630bb-8e1c-447b-acea-3a976a67a9eb","component":"Authentication","eventName":"AM-NODE-LOGIN-COMPLETED","entries":[{"info":{"nodeOutcome":"true","treeName":"ImpersonateTree","displayName":"ImpersonateNode","nodeType":"ImpersonateNode","nodeId":"6578195d-b913-4133-a29b-62edb753f8e5","authLevel":"0","nodeExtraLogging":{"impersonatorUserID":"user.666","impersonatedUserID":"user.90"}}}],"principal":["user.90"],"timestamp":"2019-04-18T16:36:12.761Z","trackingIds":["992714be-133e-4b88-a155-50236b90eaa4-17549"],"_id":"992714be-133e-4b88-a155-50236b90eaa4-17723"}
+{"realm":"/employees","transactionId":"8f1f3ef9-cc3f-4930-9a46-2815b09502af-1078","component":"Authentication","eventName":"AM-NODE-LOGIN-COMPLETED","entries":[{"info":{"nodeOutcome":"true","treeName":"ImpersonateTree","displayName":"ImpersonateNode","nodeType":"ImpersonateNode","nodeId":"6578195d-b913-4133-a29b-62edb753f8e5","authLevel":"0","nodeExtraLogging":{"impersonatorUserID":"user.666","impersonatedUserID":"user.90"}}}],"principal":["user.90"],"timestamp":"2019-04-25T15:17:18.109Z","trackingIds":["8f1f3ef9-cc3f-4930-9a46-2815b09502af-978"],"_id":"8f1f3ef9-cc3f-4930-9a46-2815b09502af-1084"}
 ```
-2. AM can be configured for [trusting common transaction Id](https://backstage.forgerock.com/docs/am/6.5/maintenance-guide/#configuring-trusttransactionheader-system-property). This means client application can leverage the same transaction Id header(X-ForgeRock-Transactionid) for performing all impersonated operations and AM shall log audit events with the same transaction id, such as:
-    * Authenticate: Include random X-ForgeRock-Transactionid such as: 166630bb-8e1c-447b-acea-3a976a67a9eb
+2. Additionally, AM leverages [trackingIds](https://backstage.forgerock.com/docs/am/6.5/maintenance-guide/#access-log-format) to correlate multiple events belonging to same session. This means trackingIds from authentication audit event can be used to correlate all operations performed by impersonator. 
+   
+   * Authenticate 
     ```
     curl -X POST \
       'http://am6002.example.com:8282/am/json/realms/root/realms/employees/authenticate?authIndexType=service&authIndexValue=ImpersonateTree' \
       -H 'Accept-API-Version: resource=2.0, protocol=1.0' \
       -H 'Content-Type: application/json' \
-      -H 'X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb' \
       -d '{
-        "authId": "eyJ0eXAi...",
+        "authId": "eyJ0e...",
         "callbacks": [
             {
                 "type": "NameCallback",
@@ -117,23 +117,22 @@ The code in this repository has binary dependencies that live in the ForgeRock m
     ```
     Corresponding audit entry in authentication.audit.json  
     ```
-    {"realm":"/employees","transactionId":"166630bb-8e1c-447b-acea-3a976a67a9eb","component":"Authentication","eventName":"AM-NODE-LOGIN-COMPLETED","entries":[{"info":{"nodeOutcome":"true","treeName":"ImpersonateTree","displayName":"ImpersonateNode","nodeType":"ImpersonateNode","nodeId":"6578195d-b913-4133-a29b-62edb753f8e5","authLevel":"0","nodeExtraLogging":{"impersonatorUserID":"user.666","impersonatedUserID":"user.90"}}}],"principal":["user.90"],"timestamp":"2019-04-18T16:36:12.761Z","trackingIds":["992714be-133e-4b88-a155-50236b90eaa4-17549"],"_id":"992714be-133e-4b88-a155-50236b90eaa4-17723"}
+    {"realm":"/employees","transactionId":"8f1f3ef9-cc3f-4930-9a46-2815b09502af-1078","component":"Authentication","eventName":"AM-NODE-LOGIN-COMPLETED","entries":[{"info":{"nodeOutcome":"true","treeName":"ImpersonateTree","displayName":"ImpersonateNode","nodeType":"ImpersonateNode","nodeId":"6578195d-b913-4133-a29b-62edb753f8e5","authLevel":"0","nodeExtraLogging":{"impersonatorUserID":"user.666","impersonatedUserID":"user.90"}}}],"principal":["user.90"],"timestamp":"2019-04-25T15:17:18.109Z","trackingIds":["8f1f3ef9-cc3f-4930-9a46-2815b09502af-978"],"_id":"8f1f3ef9-cc3f-4930-9a46-2815b09502af-1084"}
     ```
 
-    * Validate: Include same X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb
+    * Validate: 
     ```
     curl -X POST \
-      'http://am6002.example.com:8282/am/json/sessions?tokenId=xIq5m2parhVVFoCDXPjJXhlls8U.%2AAAJTSQACMDEAAlNLABx2dUtSZ1RURDhNWWlZOFBPTGpuckJaQUpJOWc9AAR0eXBlAANDVFMAAlMxAAA.%2A&_action=validate' \
-      -H 'Accept-API-Version: resource=1.1' \
-      -H 'Content-Type: application/json' \
-      -H 'X-ForgeRock-Transactionid: 166630bb-8e1c-447b-acea-3a976a67a9eb'
+     'http://am6002.example.com:8282/am/json/sessions?tokenId=yhxmmt5tGn21eBlaY4Cme_of3Jg.%2AAAJTSQACMDEAAlNLABxvNmdDVXFkM2FxdTZIRldMNjVtQXo2RTI5QlE9AAR0eXBlAANDVFMAAlMxAAA.%2A&_action=validate' \
+     -H 'Accept-API-Version: resource=1.1' \
+     -H 'Content-Type: application/json' 
     ```
     Corresponding audit entry in access.audit.json
     ```
-    {"realm":"/","transactionId":"992714be-133e-4b88-a155-50236b90eaa4-18063","userId":"id=user.90,ou=user,o=employees,ou=services,dc=openam,dc=forgerock,dc=org","client":{"ip":"192.168.56.1","port":60705},"server":{"ip":"192.168.56.132","port":8282},"http":{"request":{"secure":false,"method":"POST","queryParameters":{"_action":["validate"]},"headers":{"accept":["*/*"],"accept-api-version":["resource=1.1"],"host":["am6002.example.com:8282"],"postman-token":["66206b06-6a30-406d-b125-98a903946566"],"user-agent":["PostmanRuntime/7.6.1"],"x-forgerock-transactionid":["166630bb-8e1c-447b-acea-3a976a67a9eb"]},"cookies":{"amlbcookie":"01"},"path":"http://am6002.example.com:8282/am/json/sessions"}},"request":{"protocol":"CREST","operation":"ACTION","detail":{"action":"validate"}},"timestamp":"2019-04-18T16:37:22.887Z","eventName":"AM-ACCESS-OUTCOME","component":"Session","response":{"status":"SUCCESSFUL","statusCode":"","elapsedTime":101,"elapsedTimeUnits":"MILLISECONDS"},"trackingIds":["992714be-133e-4b88-a155-50236b90eaa4-17549"],"_id":"992714be-133e-4b88-a155-50236b90eaa4-18080"}
+    {"realm":"/","transactionId":"8f1f3ef9-cc3f-4930-9a46-2815b09502af-1119","userId":"id=user.90,ou=user,o=employees,ou=services,dc=openam,dc=forgerock,dc=org","client":{"ip":"192.168.56.1","port":51124},"server":{"ip":"192.168.56.132","port":8282},"http":{"request":{"secure":false,"method":"POST","queryParameters":{"_action":["validate"]},"headers":{"accept":["*/*"],"accept-api-version":["resource=1.1"],"host":["am6002.example.com:8282"],"postman-token":["28cfd04d-5d70-4556-bdf8-92c380528d8a"],"user-agent":["PostmanRuntime/7.6.1"]},"cookies":{"amlbcookie":"01"},"path":"http://am6002.example.com:8282/am/json/sessions"}},"request":{"protocol":"CREST","operation":"ACTION","detail":{"action":"validate"}},"timestamp":"2019-04-25T15:17:21.460Z","eventName":"AM-ACCESS-OUTCOME","component":"Session","response":{"status":"SUCCESSFUL","statusCode":"","elapsedTime":160,"elapsedTimeUnits":"MILLISECONDS"},"trackingIds":["8f1f3ef9-cc3f-4930-9a46-2815b09502af-978"],"_id":"8f1f3ef9-cc3f-4930-9a46-2815b09502af-1130"}
     ```
     
-    * Common transactionId: *166630bb-8e1c-447b-acea-3a976a67a9eb* can be used to filter audit logs for impersonated events.   
+    * Common `trackingIds`: *8f1f3ef9-cc3f-4930-9a46-2815b09502af-978* can be used to filter audit logs for impersonated events.   
 
 
 
