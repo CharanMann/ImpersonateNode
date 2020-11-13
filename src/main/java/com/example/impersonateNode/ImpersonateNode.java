@@ -18,10 +18,11 @@
 package com.example.impersonateNode;
 
 import com.google.inject.assistedinject.Assisted;
-import com.sun.identity.shared.debug.Debug;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.annotations.sm.Attribute;
 import org.forgerock.openam.auth.node.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
@@ -36,9 +37,8 @@ import static org.forgerock.openam.auth.node.api.SharedStateConstants.USERNAME;
         configClass = ImpersonateNode.Config.class)
 public class ImpersonateNode extends AbstractDecisionNode {
 
-    private final static String DEBUG_FILE = "ImpersonateNode";
     private final Config config;
-    private Debug debug = Debug.getInstance(DEBUG_FILE);
+    private final Logger logger = LoggerFactory.getLogger(ImpersonateNode.class);
     private String impersonatedUserID;
     private String impersonatorUserID;
 
@@ -57,17 +57,17 @@ public class ImpersonateNode extends AbstractDecisionNode {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
 
-        debug.message("[ImpersonateNode]: Using Impersonator: " + context.sharedState.get(USERNAME).asString());
+        logger.debug("[ImpersonateNode]: Using Impersonator: " + context.sharedState.get(USERNAME).asString());
         impersonatorUserID = context.sharedState.get(USERNAME).asString();
         impersonatedUserID = config.impersonatedUserID();
 
         // Get impersonatedUserID from shared state
         if ((impersonatedUserID.indexOf("{{") == 0) && (impersonatedUserID.indexOf("}}") == (impersonatedUserID.length() - 2))) {
             impersonatedUserID = context.sharedState.get(impersonatedUserID.substring(2, impersonatedUserID.length() - 2)).asString();
-            debug.message("[ImpersonateNode]:  Found existing shared state attribute {{impersonated}}: " + impersonatedUserID);
+            logger.debug("[ImpersonateNode]:  Found existing shared state attribute {{impersonated}}: " + impersonatedUserID);
         }
 
-        debug.message("[ImpersonateNode]: Using Impersonated UserID:" + impersonatedUserID);
+        logger.debug("[ImpersonateNode]: Using Impersonated UserID:" + impersonatedUserID);
 
         // Changing the shared state "username" to impersonatedUserID
         return goTo(true).replaceSharedState(context.sharedState.copy().put(USERNAME, impersonatedUserID)).build();
